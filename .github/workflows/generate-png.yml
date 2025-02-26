@@ -23,33 +23,42 @@ jobs:
 
       - name: Convert SVGs to PNGs
         run: |
-          # Fetch the latest master branch
-          git fetch origin master
+          # Get list of changed SVG files with proper handling, replace NUL with newline
+          changed_files=$(git diff --name-only origin/master -z -- "*.svg" | tr '\0' '\n')
 
-          # Find updated svg files, compare to master branch (can't compare to previous commit because the conversion is done in remote)
-          updated_files=$(git diff --name-only origin/master -- '*.svg')
-
-          # If no files were found, process all SVG files
-          if [ -z "$updated_files" ]; then
-            updated_files=$(find ./ -type f -name "*.svg")
+          # If no files are different, exit early
+          if [ -z "$changed_files" ]; then
+              echo "No SVG files different from origin/master"
+              exit 0
           fi
 
-          # Count the number of updated files
-          updated_files_count=$(echo "$updated_files" | wc -l)
+          total_files=$(echo "$changed_files" | wc -l)
+          progress=0
 
-          # Convert updated svg files to png
-          for file in $updated_files; do
+          # Process each changed file directly
+          echo "$changed_files" | while IFS= read -r relative_path; do
+              # Decode any incorrectly encoded filenames
+              relative_path=$(printf '%b' "$relative_path")
+
+              file="./$relative_path"
               progress=$((progress + 1))
-              percentage=$((progress * 100 / updated_files_count))
+              percentage=$((progress * 100 / total_files))
               filled=$((percentage / 2))
               unfilled=$((50 - filled))
               
               printf "\rProgress: [%${filled}s%${unfilled}s] %d%%" "$(printf '#%.0s' $(seq 1 $filled))" "$(printf ' %.0s' $(seq 1 $unfilled))" "$percentage"
+
+              # Ensure filename safety (replace spaces safely)
               png_file="${file%.svg} 4k"
-              # convert -background none -density 700 "$file" -quality 100 -resize 4000 "$png_file"
-              inkscape "$file" --export-background-opacity=0 -h 4000 -o "$png_file".temp.png
-              pngquant -f --quality 100 "$png_file".temp.png --output "$png_file".png
-              rm "$png_file".temp.png
+
+              # Use Inkscape with properly decoded filenames
+              inkscape "$file" --export-background-opacity=0 -h 4000 -o "$png_file.temp.png"
+
+              # Ensure pngquant correctly processes the file
+              pngquant -f --quality 100 --output "$png_file.png" -- "$png_file.temp.png"
+              
+              # Remove temporary PNG file
+              rm "$png_file.temp.png"
           done
           echo
 
