@@ -17,18 +17,19 @@ jobs:
 
       - name: Install Inkscape
         run: |
-          sudo apt install inkscape
+          sudo apt update -y
+          sudo apt install inkscape -y
 
       - name: Install Pngquant
         run: |
-          sudo apt install pngquant
+          sudo apt install pngquant -y
 
       - name: Convert SVGs to PNGs
         run: |
           git fetch origin master
 
           # Get list of changed SVG files with proper handling, replace NUL with newline and ignore deleted files
-          changed_files=$(git diff --name-only origin/master --diff-filter=AM -z -- "*.svg" | tr '\0' '\n')
+          changed_files=$(git diff --name-only origin/master --diff-filter=ACMR -z -- "*.svg" | tr '\0' '\n')
 
           # If no files are different, exit early
           if [ -z "$changed_files" ]; then

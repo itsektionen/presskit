@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2fff/svg" viewBox="0 0 566.93 566.93">
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566.93 566.93">
   <g id="Outer_Square" data-name="Outer Square">
     <g id="Bottom_Right" data-name="Bottom Right">
       <polyline points="488.55 286.35 546.01 286.62 566.93 307.55 541.83 332.65 520.91 311.73 468.99 305.92 488.55 286.35" style="fill: #000; stroke-width: 0px;"/>
@@ -45,6 +45,9 @@
       <polyline points="238.18 120.77 225.92 75.31 205 54.39 230.1 29.29 251.02 50.21 257.75 101.2 238.18 120.77" style="fill: #000; stroke-width: 0px;"/>
       <polyline points="261.01 97.94 255.2 46.02 234.28 25.1 259.39 0 280.3 20.92 280.58 78.38 261.01 97.94" style="fill: #000; stroke-width: 0px;"/>
     </g>
+  </g>
+  <g id="Inner_Square" data-name="Inner Square">
+    <path id="Core" d="M283.47,481.27c-2.23,0-4.46-.85-6.17-2.55l-189.09-189.09c-3.4-3.4-3.4-8.93,0-12.33l170.55-170.55h49.4l170.55,170.55c3.4,3.4,3.4,8.93,0,12.33l-189.08,189.09c-1.7,1.7-3.93,2.55-6.17,2.55" style="fill: #000; stroke-width: 0px;"/>
   </g>
   <g>
     <path id="I" d="M208.26,310.02l71.28-30.26c2.38-1.01,3.92-3.34,3.92-5.93v-140.17c0-1.76-2.41-2.24-3.09-.63l-74.23,174.87c-.56,1.33.78,2.68,2.11,2.11h0Z" style="fill: #000; stroke-width: 0px;"/>
