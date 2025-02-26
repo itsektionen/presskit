@@ -23,24 +23,24 @@ jobs:
 
       - name: Convert SVGs to PNGs
         run: |
-          total_files=$(find ./ -type f -name "*.svg" | wc -l)
-          progress=0
-
           # Fetch the latest master branch
           git fetch origin master
 
           # Find updated svg files, compare to master branch (can't compare to previous commit because the conversion is done in remote)
-          updated_files=$(git diff --name-only origin/HEAD:refs/heads/master -- '*.svg')
+          updated_files=$(git diff --name-only origin/master -- '*.svg')
 
           # If no files were found, process all SVG files
           if [ -z "$updated_files" ]; then
             updated_files=$(find ./ -type f -name "*.svg")
           fi
 
+          # Count the number of updated files
+          updated_files_count=$(echo "$updated_files" | wc -l)
+
           # Convert updated svg files to png
           for file in $updated_files; do
               progress=$((progress + 1))
-              percentage=$((progress * 100 / total_files))
+              percentage=$((progress * 100 / updated_files_count))
               filled=$((percentage / 2))
               unfilled=$((50 - filled))
               
