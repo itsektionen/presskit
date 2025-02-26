@@ -27,8 +27,8 @@ jobs:
         run: |
           git fetch origin master
 
-          # Get list of changed SVG files with proper handling, replace NUL with newline
-          changed_files=$(git diff --name-only origin/master -z -- "*.svg" | tr '\0' '\n')
+          # Get list of changed SVG files with proper handling, replace NUL with newline and ignore deleted files
+          changed_files=$(git diff --name-only origin/master --diff-filter=AM -z -- "*.svg" | tr '\0' '\n')
 
           # If no files are different, exit early
           if [ -z "$changed_files" ]; then
