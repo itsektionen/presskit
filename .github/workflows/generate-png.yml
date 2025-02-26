@@ -26,8 +26,11 @@ jobs:
           total_files=$(find ./ -type f -name "*.svg" | wc -l)
           progress=0
 
+          # Fetch the latest master branch
+          git fetch origin master
+
           # Find updated svg files, compare to master branch (can't compare to previous commit because the conversion is done in remote)
-          updated_files=$(git diff --name-only origin/master -- '*.svg')
+          updated_files=$(git diff --name-only origin/HEAD:refs/heads/master -- '*.svg')
 
           # If no files were found, process all SVG files
           if [ -z "$updated_files" ]; then
