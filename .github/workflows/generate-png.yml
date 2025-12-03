@@ -4,7 +4,9 @@ on:
   pull_request:
     branches:
       - master
-
+    paths:
+      - "**.svg"
+    
 jobs:
   convert-svg-to-png:
     runs-on: ubuntu-latest
@@ -15,29 +17,53 @@ jobs:
 
       - name: Install Inkscape
         run: |
-          sudo apt install inkscape
+          sudo apt update -y
+          sudo apt install inkscape -y
 
       - name: Install Pngquant
         run: |
-          sudo apt install pngquant
+          sudo apt install pngquant -y
 
       - name: Convert SVGs to PNGs
         run: |
-          total_files=$(find ./ -type f -name "*.svg" | wc -l)
+          git fetch origin master
+
+          # Get list of changed SVG files with proper handling, replace NUL with newline and ignore deleted files
+          changed_files=$(git diff --name-only origin/master --diff-filter=ACMR -z -- "*.svg" | tr '\0' '\n')
+
+          # If no files are different, exit early
+          if [ -z "$changed_files" ]; then
+              echo "No SVG files different from origin/master"
+              exit 0
+          fi
+
+          total_files=$(echo "$changed_files" | wc -l)
           progress=0
 
-          find ./ -type f -name "*.svg" | while IFS= read -r file; do
+          # Process each changed file directly
+          echo "$changed_files" | while IFS= read -r relative_path; do
+              # Decode any incorrectly encoded filenames
+              relative_path=$(printf '%b' "$relative_path")
+
+              file="./$relative_path"
               progress=$((progress + 1))
               percentage=$((progress * 100 / total_files))
               filled=$((percentage / 2))
               unfilled=$((50 - filled))
               
               printf "\rProgress: [%${filled}s%${unfilled}s] %d%%" "$(printf '#%.0s' $(seq 1 $filled))" "$(printf ' %.0s' $(seq 1 $unfilled))" "$percentage"
+
+              # Ensure filename safety (replace spaces safely)
               png_file="${file%.svg} 4k"
-              # convert -background none -density 700 "$file" -quality 100 -resize 4000 "$png_file"
-              inkscape "$file" --export-background-opacity=0 -h 4000 -o "$png_file".temp.png
-              pngquant -f --quality 100 "$png_file".temp.png --output "$png_file".png
-              rm "$png_file".temp.png
+
+              # Use Inkscape with properly decoded filenames
+              inkscape "$file" --export-background-opacity=0 -h 4000 -o "$png_file.temp.png"
+
+              # Ensure pngquant correctly processes the file
+              pngquant -f --quality 100 --output "$png_file.png" -- "$png_file.temp.png"
+              
+              # Remove temporary PNG file
+              rm "$png_file.temp.png"
           done
           echo
 
