@@ -30,7 +30,8 @@ jobs:
           git fetch origin master
 
           # Get list of changed SVG files with proper handling, replace NUL with newline and ignore deleted files
-          changed_files=$(git diff --name-only origin/master --diff-filter=ACMR -z -- "*.svg" | tr '\0' '\n')
+          #changed_files=$(git diff --name-only origin/master --diff-filter=ACMR -z -- "*.svg" | tr '\0' '\n')
+          changed_files=$(find . -path ./.git -prune -o -name "*.svg" -print)
 
           # If no files are different, exit early
           if [ -z "$changed_files" ]; then
@@ -78,8 +79,22 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin "${GITHUB_HEAD_REF}"
-          git checkout "${GITHUB_HEAD_REF}"
+
+          # Determine the branch name based on the trigger event
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH_NAME="${{ github.head_ref }}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+
+          git fetch origin "$BRANCH_NAME"
+          git checkout "$BRANCH_NAME"
           git add .
-          git commit -m "Generate PNGs"
-          git push origin "${GITHUB_HEAD_REF}"
+
+          # Check if there are any changes to commit to avoid errors
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Generate PNGs"
+            git push origin "$BRANCH_NAME"
+          fi
