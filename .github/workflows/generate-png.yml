@@ -1,7 +1,6 @@
 name: Generate PNGs
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - master
