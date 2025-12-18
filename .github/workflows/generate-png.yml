@@ -1,19 +1,20 @@
 name: Generate PNGs
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - master
     paths:
       - "**.svg"
-    
+
 jobs:
   convert-svg-to-png:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6.0.1
 
       - name: Install Inkscape
         run: |
@@ -54,16 +55,20 @@ jobs:
               printf "\rProgress: [%${filled}s%${unfilled}s] %d%%" "$(printf '#%.0s' $(seq 1 $filled))" "$(printf ' %.0s' $(seq 1 $unfilled))" "$percentage"
 
               # Ensure filename safety (replace spaces safely)
-              png_file="${file%.svg} 4k"
+              png_file_4k="${file%.svg} 4k"
+              png_file_1k="${file%.svg} 1k"
 
               # Use Inkscape with properly decoded filenames
-              inkscape "$file" --export-background-opacity=0 -h 4000 -o "$png_file.temp.png"
+              inkscape "$file" --export-background-opacity=0 -h 4000 -o "$png_file_4k.temp.png"
+              inkscape "$file" --export-background-opacity=0 -h 1000 -o "$png_file_1k.temp.png"
 
               # Ensure pngquant correctly processes the file
-              pngquant -f --quality 100 --output "$png_file.png" -- "$png_file.temp.png"
+              pngquant -f --quality 100 --output "$png_file_4k.png" -- "$png_file_4k.temp.png"
+              pngquant -f --quality 100 --output "$png_file_1k.png" -- "$png_file_1k.temp.png"
               
               # Remove temporary PNG file
-              rm "$png_file.temp.png"
+              rm "$png_file_4k.temp.png"
+              rm "$png_file_1k.temp.png"
           done
           echo
 
